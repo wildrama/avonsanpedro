@@ -15,7 +15,7 @@ router.get('/administrador', async (req, res) => {
   });
 
  
-  router.get('/ingreso-administrador', async(req,res)=>{
+  router.get('/adm', async(req,res)=>{
     res.render('home');
   });
   
