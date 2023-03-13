@@ -3,7 +3,7 @@ const router = express.Router();
 const catchAsync = require('../utils/catchAsync');
 const {isLoggedIn,isAdmin} = require('../middleware');
 const Producto = require('../models/productos');
-
+const Categoria = require('../models/categoria');
 
 
 
@@ -14,7 +14,7 @@ const roleADM = 'ADMINISTRADOR';
 router.get('/',isLoggedIn ,isAdmin(roleADM), catchAsync(async (req, res) => {
    const busqueda = req.body.busqueda
     console.log(req.user.funcion)
-    const productos = await Producto.find({});
+    const productos = await Producto.find({}).populate('categoriaId');
     const cantidadTotalDeProductos = await Producto.countDocuments({}).exec();
     res.render('stock/verStock', { productos, cantidadTotalDeProductos });
  
@@ -26,17 +26,18 @@ router.get('/',isLoggedIn ,isAdmin(roleADM), catchAsync(async (req, res) => {
 //  CREATE {
 // RENDER FORMULARIO DE CARGA DE STOCK
 
-router.get('/nuevo', isLoggedIn,isAdmin(roleADM), (req, res) => {
+router.get('/nuevo', isLoggedIn,isAdmin(roleADM), catchAsync(async (req, res) => {
   console.log(req.user, 'req.user....');
+  const categoriasAll = await Categoria.find({}).sort({nombre: 1});
 
-  res.render('stock/cargaStock');
-})
+  res.render('stock/cargaStock',{categoriasAll});
+}))
 // ENVIAR DATOS DEL FORMULARIO A LA BBDD
 
 router.post('/',isLoggedIn,isAdmin(roleADM), catchAsync(async (req, res) => {
   const nuevoProducto = new Producto(req.body);
   await nuevoProducto.save();
-  req.flash('success', 'Producto cargado correctamente correctamente');
+  req.flash('success', 'Producto cargado correctamente ');
 
   res.redirect(`/administrador/productos/${nuevoProducto._id}`)
 }))
@@ -59,13 +60,14 @@ router.get('/api/productos', function(req, res) {
 // ACTUALIZAR UN PRODUCTO DEL STOCK
 // poblate the products with the form and values
 router.get('/:id/edit',isLoggedIn, isAdmin(roleADM), catchAsync(async (req, res) => {
-
   const { id } = req.params;
+  const categoriasAll1 = await Categoria.find({});
+
   const producto = await Producto.findById(id);
   if (!producto) {
     req.flash('error', 'No se puede encontrar la este producto');
 }
-  res.render('stock/stockIndividual', { producto })
+  res.render('stock/stockIndividual', { producto,categoriasAll1 })
 }))
 
 
