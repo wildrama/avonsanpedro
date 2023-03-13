@@ -42,7 +42,18 @@ router.post('/',isLoggedIn,isAdmin(roleADM), catchAsync(async (req, res) => {
 }))
 
 // }
+router.get('/api/productos', function(req, res) {
+  // Obtener la consulta de búsqueda del parámetro de cadena de consulta
+  const searchQuery = req.query.search;
 
+  // Realizar la búsqueda en la base de datos
+  const results = productos.filter(producto => {
+    return producto.nombre.toLowerCase().includes(searchQuery.toLowerCase());
+  });
+
+  // Devolver los resultados de la búsqueda como JSON
+  res.json(results);
+});
 
 // UPDATE {
 // ACTUALIZAR UN PRODUCTO DEL STOCK
